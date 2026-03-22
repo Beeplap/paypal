@@ -1,46 +1,584 @@
-<div id="smart-button-container">
-      <div style="text-align: center;">
-        <div id="paypal-button-container"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pay with PayPal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://www.paypal.com/sdk/js?client-id=AYgVgdy0cE8pOjjXhjjtmSApiz2qFKXRimFlG-pxWsyDiVvpBfRX1uxEMgIPRHMQyJ1XgJJDpfVT8qJM&currency=USD&intent=capture&components=buttons,funding-eligibility"></script>
+  <style>
+    :root {
+      --bg-1: #06131f;
+      --bg-2: #0d2233;
+      --bg-3: #153a53;
+      --panel: rgba(8, 20, 32, 0.78);
+      --panel-strong: rgba(7, 18, 29, 0.92);
+      --line: rgba(255, 255, 255, 0.1);
+      --text: #eef6ff;
+      --muted: #9eb3c8;
+      --accent: #ffc439;
+      --accent-2: #00c2ff;
+      --success: #3ddc97;
+      --danger: #ff6b6b;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(0, 194, 255, 0.2), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(255, 196, 57, 0.18), transparent 20%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2) 55%, var(--bg-3));
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(70px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      top: -120px;
+      left: -100px;
+      background: rgba(0, 194, 255, 0.18);
+      animation: drift 10s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      right: -120px;
+      bottom: -120px;
+      background: rgba(255, 196, 57, 0.14);
+      animation: drift 12s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes drift {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(30px, -20px, 0) scale(1.08); }
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 32px));
+      margin: 40px auto;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+    }
+
+    .hero {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 34%),
+        radial-gradient(circle at 20% 20%, rgba(0, 194, 255, 0.16), transparent 24%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #d8e8f8;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 14px var(--success);
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.2rem, 5vw, 4.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 10ch;
+    }
+
+    .lead {
+      max-width: 56ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 26px;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .benefit {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .benefit strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .benefit span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .checkout {
+      padding: 28px;
+      background: var(--panel-strong);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ffc439, #ffdf88);
+      color: #0b1b29;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      box-shadow: 0 14px 28px rgba(255, 196, 57, 0.22);
+    }
+
+    .secure {
+      font-size: 0.88rem;
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .summary {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .summary-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+
+    .summary-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+
+    .summary-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .price {
+      text-align: right;
+    }
+
+    .price strong {
+      display: block;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2.1rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .price span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .line-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      color: #dce9f5;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.96rem;
+    }
+
+    .line-item span:last-child {
+      color: var(--muted);
+    }
+
+    .payment-card {
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background:
+        radial-gradient(circle at top right, rgba(0, 194, 255, 0.1), transparent 28%),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .payment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .payment-header h2 {
+      margin: 0;
+      font-size: 1.08rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 0 18px;
+    }
+
+    .chip {
+      padding: 9px 12px;
+      font-size: 0.86rem;
+      color: #deebf8;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    #paypal-button-container {
+      min-height: 46px;
+      margin-top: 8px;
+    }
+
+    .status {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      display: none;
+      font-size: 0.94rem;
+      line-height: 1.55;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.info {
+      background: rgba(0, 194, 255, 0.12);
+      border: 1px solid rgba(0, 194, 255, 0.3);
+      color: #d8f7ff;
+    }
+
+    .status.success {
+      background: rgba(61, 220, 151, 0.12);
+      border: 1px solid rgba(61, 220, 151, 0.35);
+      color: #defff0;
+    }
+
+    .status.error {
+      background: rgba(255, 107, 107, 0.12);
+      border: 1px solid rgba(255, 107, 107, 0.32);
+      color: #ffe3e3;
+    }
+
+    .trust {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .trust strong {
+      color: #edf6ff;
+      font-weight: 600;
+    }
+
+    @media (max-width: 980px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 20px, 100%);
+        margin: 18px auto 28px;
+      }
+
+      .hero,
+      .checkout {
+        padding: 20px;
+      }
+
+      .summary-head,
+      .topbar {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .price {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel hero">
+      <div class="eyebrow">
+        <span class="dot"></span>
+        Premium checkout experience
       </div>
-    </div>
-  <script src="https://www.paypal.com/sdk/js?client-id=AYgVgdy0cE8pOjjXhjjtmSApiz2qFKXRimFlG-pxWsyDiVvpBfRX1uxEMgIPRHMQyJ1XgJJDpfVT8qJM" data-sdk-integration-source="button-factory"></script>
+
+      <h1>Pay beautifully. Check out securely.</h1>
+      <p class="lead">
+        A modern PayPal payment experience with a cinematic visual layer, responsive layout,
+        and frictionless wallet checkout your customers will actually enjoy using.
+      </p>
+
+      <div class="benefits">
+        <article class="benefit">
+          <strong>Fast Wallet Flow</strong>
+          <span>Customers can pay with PayPal, eligible cards, and supported local funding sources.</span>
+        </article>
+        <article class="benefit">
+          <strong>Built for Trust</strong>
+          <span>Secure visual cues, polished spacing, and transparent totals help reduce checkout hesitation.</span>
+        </article>
+        <article class="benefit">
+          <strong>Mobile First</strong>
+          <span>Adaptive grid and compact card layout keep the payment screen crisp on every device.</span>
+        </article>
+      </div>
+    </section>
+
+    <aside class="panel checkout">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-badge">PP</div>
+          <div>
+            <div>PayPal Checkout</div>
+            <small style="color: var(--muted);">Smart payment options</small>
+          </div>
+        </div>
+        <div class="secure">256-bit secure session</div>
+      </div>
+
+      <section class="summary">
+        <div class="summary-head">
+          <div>
+            <p class="summary-title">Creative Pro Subscription</p>
+            <p class="summary-copy">
+              Full access to premium templates, secure cloud sync, and advanced customer support.
+            </p>
+          </div>
+          <div class="price">
+            <strong id="amount-display">$49.00</strong>
+            <span>billed today</span>
+          </div>
+        </div>
+
+        <div class="line-item">
+          <span>Plan</span>
+          <span>Pro Annual</span>
+        </div>
+        <div class="line-item">
+          <span>Tax</span>
+          <span>Included</span>
+        </div>
+        <div class="line-item">
+          <span>Delivery</span>
+          <span>Instant access</span>
+        </div>
+      </section>
+
+      <section class="payment-card">
+        <div class="payment-header">
+          <h2>Choose your PayPal payment option</h2>
+          <span class="chip">Pay with confidence</span>
+        </div>
+
+        <div class="chips">
+          <span class="chip">PayPal Wallet</span>
+          <span class="chip">Pay Later</span>
+          <span class="chip">Debit or Credit Card</span>
+        </div>
+
+        <div id="paypal-button-container"></div>
+        <div id="payment-status" class="status info"></div>
+
+        <div class="trust">
+          <span><strong>Protected:</strong> encrypted checkout session</span>
+          <span><strong>Flexible:</strong> buttons adapt to eligible funding sources</span>
+        </div>
+      </section>
+    </aside>
+  </main>
+
   <script>
-    function initPayPalButton() {
+    const amount = "49.00";
+    const currency = "USD";
+    const statusBox = document.getElementById("payment-status");
+    const amountDisplay = document.getElementById("amount-display");
+
+    amountDisplay.textContent = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency
+    }).format(Number(amount));
+
+    function showStatus(message, type) {
+      statusBox.className = "status show " + type;
+      statusBox.textContent = message;
+    }
+
+    if (typeof paypal === "undefined") {
+      showStatus("PayPal SDK failed to load. Check your client ID and internet connection.", "error");
+    } else if (window.location.href.includes("YOUR_PAYPAL_CLIENT_ID")) {
+      showStatus("Replace YOUR_PAYPAL_CLIENT_ID in the PayPal script URL to activate live buttons.", "info");
+    } else {
       paypal.Buttons({
         style: {
-          shape: 'rect',
-          color: 'gold',
-          layout: 'vertical',
-          label: 'paypal',
-          
+          layout: "vertical",
+          color: "gold",
+          shape: "rect",
+          label: "paypal",
+          height: 50,
+          tagline: false
         },
 
-        createOrder: function(data, actions) {
+        createOrder: function (data, actions) {
+          showStatus("Redirect-free checkout is ready. Choose a PayPal option to continue.", "info");
           return actions.order.create({
-            purchase_units: [{"amount":{"currency_code":"USD","value":2}}]
+            purchase_units: [
+              {
+                description: "Creative Pro Subscription",
+                amount: {
+                  currency_code: currency,
+                  value: amount
+                }
+              }
+            ]
           });
         },
 
-        onApprove: function(data, actions) {
-          return actions.order.capture().then(function(orderData) {
-            
-            // Full available details
-            console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+        onApprove: function (data, actions) {
+          return actions.order.capture().then(function (details) {
+            const name =
+              details &&
+              details.payer &&
+              details.payer.name &&
+              details.payer.name.given_name
+                ? details.payer.name.given_name
+                : "Customer";
 
-            // Show a success message within this page, e.g.
-            const element = document.getElementById('paypal-button-container');
-            element.innerHTML = '';
-            element.innerHTML = '<h3>Thank you for your payment!</h3>';
-
-            // Or go to another URL:  actions.redirect('thank_you.html');
-            
+            showStatus(
+              "Payment completed successfully. Thank you, " +
+                name +
+                ". Transaction ID: " +
+                details.id,
+              "success"
+            );
           });
         },
 
-        onError: function(err) {
-          console.log(err);
+        onError: function (err) {
+          console.error(err);
+          showStatus("Something went wrong while processing PayPal checkout. Please try again.", "error");
+        },
+
+        onCancel: function () {
+          showStatus("Checkout was canceled. Your order has not been charged.", "info");
         }
-      }).render('#paypal-button-container');
+      }).render("#paypal-button-container");
     }
-    initPayPalButton();
   </script>
+</body>
+</html>
